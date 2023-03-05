@@ -13,12 +13,12 @@
   "scripts": {
     "compile-play": "circom circuits/play.circom -o dist/ --r1cs --wasm --sym --c",
     "setup-play": "snarkjs plonk setup dist/play.r1cs powersOfTau28_hez_final_17.ptau dist/play_final.zkey",
-    "solver-play": "snarkjs zkey export solidityverifier dist/play_final.zkey dist/play_verifier.sol",
+    "solver-play": "snarkjs zkey export solidityverifier dist/play_final.zkey dist/PlayVerifier.sol",
     "verkey-play": "snarkjs zkey export verificationkey dist/play_final.zkey dist/play_verification_key.json",
     "build-play": "yarn compile-play && yarn setup-play && yarn solver-play && yarn verkey-play",
     "compile-draw": "circom circuits/draw.circom -o dist/ --r1cs --wasm --sym --c",
     "setup-draw": "snarkjs plonk setup dist/draw.r1cs powersOfTau28_hez_final_17.ptau dist/draw_final.zkey",
-    "solver-draw": "snarkjs zkey export solidityverifier dist/draw_final.zkey dist/draw_verifier.sol",
+    "solver-draw": "snarkjs zkey export solidityverifier dist/draw_final.zkey dist/DrawVerifier.sol",
     "verkey-draw": "snarkjs zkey export verificationkey dist/draw_final.zkey dist/draw_verification_key.json",
     "build-draw": "yarn compile-draw && yarn setup-draw && yarn solver-draw && yarn verkey-draw"
   },
