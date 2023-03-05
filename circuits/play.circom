@@ -5,7 +5,7 @@ include "./merkle.circom";
 template Play(levels) {
     signal input handRoot;
     signal input newHandRoot;
-    signal input playedCard;
+    signal input playedCardLeaf;
     signal input playedCardIndex;
     signal input playedCardHashPath[levels];
     signal input tailCardLeaf;
@@ -15,7 +15,7 @@ template Play(levels) {
     component checkRemoveLeaf = CheckRemoveLeaf(levels);
     checkRemoveLeaf.root <== handRoot;
     checkRemoveLeaf.newRoot <== newHandRoot;
-    checkRemoveLeaf.removeLeaf <== playedCard;
+    checkRemoveLeaf.removeLeaf <== playedCardLeaf;
     checkRemoveLeaf.removeIndex <== playedCardIndex;
     checkRemoveLeaf.removeHashPath <== playedCardHashPath;
     checkRemoveLeaf.tailLeaf <== tailCardLeaf;
@@ -23,4 +23,4 @@ template Play(levels) {
     checkRemoveLeaf.tailHashPath <== tailCardHashPath;
 }
 
-component main = Play(5);
+component main {public [handRoot, newHandRoot, playedCardLeaf]} = Play(6);

@@ -7,7 +7,7 @@ template Draw(levels) {
     signal input newDeckRoot;
     signal input handRoot;
     signal input newHandRoot;
-    signal input drawnCard;
+    signal input drawnCardLeaf;
     signal input deckDrawnCardIndex;
     signal input deckDrawnCardHashPath[levels];
     signal input deckTailCardLeaf;
@@ -21,7 +21,7 @@ template Draw(levels) {
     component checkRemoveLeaf = CheckRemoveLeaf(levels);
     checkRemoveLeaf.root <== deckRoot;
     checkRemoveLeaf.newRoot <== newDeckRoot;
-    checkRemoveLeaf.removeLeaf <== drawnCard;
+    checkRemoveLeaf.removeLeaf <== drawnCardLeaf;
     checkRemoveLeaf.removeIndex <== deckDrawnCardIndex;
     checkRemoveLeaf.removeHashPath <== deckDrawnCardHashPath;
     checkRemoveLeaf.tailLeaf <== deckTailCardLeaf;
@@ -31,11 +31,11 @@ template Draw(levels) {
     component checkAppendToTail = CheckAppendToTail(levels);
     checkAppendToTail.root <== handRoot;
     checkAppendToTail.newRoot <== newHandRoot;
-    checkAppendToTail.appendLeaf <== drawnCard;
+    checkAppendToTail.appendLeaf <== drawnCardLeaf;
     checkAppendToTail.tailIndex <== handTailCardIndex;
     checkAppendToTail.tailLeaf <== handTailCardLeaf;
     checkAppendToTail.tailHashPath <== handTailCardHashPath;
     checkAppendToTail.appendHashPath <== handDrawnCardHashPath;
 }
 
-component main = Draw(5);
+component main {public [deckRoot, newDeckRoot, handRoot, newHandRoot]} = Draw(6);

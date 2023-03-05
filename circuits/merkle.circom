@@ -1,5 +1,6 @@
 pragma circom 2.0.0;
 
+include "../node_modules/circomlib/circuits/mimcsponge.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
@@ -11,10 +12,12 @@ template HashLeftRight() {
     signal input right;
     signal output hash;
 
-    component hasher = Poseidon(2);
-    hasher.inputs[0] <== left;
-    hasher.inputs[1] <== right;
-    hash <== hasher.out;
+    // TODO: use more rounds
+    component hasher = MiMCSponge(2, 4, 1);
+    hasher.ins[0] <== left;
+    hasher.ins[1] <== right;
+    hasher.k <== 0;
+    hash <== hasher.outs[0];
 }
 
 // if s == 0 returns [in[0], in[1]]
@@ -54,6 +57,9 @@ template CheckAppendToTail(levels) {
     signal input tailHashPath[levels];
     signal input appendHashPath[levels];
 
+    component isZero = IsZero();
+    isZero.in <== tailIndex;
+
     component checkTail = CheckTail(levels);
     checkTail.leaf <== tailLeaf;
     checkTail.index <== tailIndex;
@@ -70,7 +76,7 @@ template CheckAppendToTail(levels) {
     checkReplaceTail.newRoot <== newRoot;
     checkReplaceTail.currLeaf <== 255;
     checkReplaceTail.newLeaf <== appendLeaf;
-    checkReplaceTail.index <== tailIndex + 1;
+    checkReplaceTail.index <== tailIndex + 1 - isZero.out;
     checkReplaceTail.hashPath <== appendHashPath;
 }
 
@@ -118,14 +124,12 @@ template CheckReplaceLeaf(levels) {
     signal input hashPath[levels];
 
     component checkBefore = CheckMembership(levels);
-    component checkAfter = CheckMembership(levels);
-
-
     checkBefore.root <== root;
     checkBefore.leaf <== currLeaf;
     checkBefore.index <== index;
     checkBefore.hashPath <== hashPath;
 
+    component checkAfter = CheckMembership(levels);
     checkAfter.root <== newRoot;
     checkAfter.leaf <== newLeaf;
     checkAfter.index <== index;
@@ -138,20 +142,28 @@ template CheckTail(levels) {
     signal input hashPath[levels];
 
     component leafIsNull = IsEqual();
-    component index2path = InverseNum2Bits(levels);
+    component index2path = Num2Bits(levels);
+    component zeroHashers[levels];
 
     leafIsNull.in[0] <== leaf;
     leafIsNull.in[1] <== 255;
-    leafIsNull.out === 0;
+    // tail can only be null if index is 0
+    leafIsNull.out * index === 0;
 
     index2path.in <== index;
 
+    var zeroHash = 255;
     for (var i = 0; i < levels; i++) {
         var s = index2path.out[i];
         var hash = hashPath[i];
         // hash must be null if sibling is on the right
         // TODO: replace 255 with hash at depth
-        (1 - s) * (255 - hash) === 0;
+        (1 - s) * (zeroHash - hash) === 0;
+
+        zeroHashers[i] = HashLeftRight();
+        zeroHashers[i].left <== zeroHash;
+        zeroHashers[i].right <== zeroHash;
+        zeroHash = zeroHashers[i].hash;
     }
 }
 
@@ -163,7 +175,7 @@ template ConstructRoot(levels) {
     
     component selectors[levels];
     component hashers[levels];
-    component index2path = InverseNum2Bits(levels);
+    component index2path = Num2Bits(levels);
 
     index2path.in <== index;
 
@@ -179,26 +191,4 @@ template ConstructRoot(levels) {
     }
 
     root <== hashers[levels - 1].hash;
-}
-
-template Invert(n) {
-    signal input in[n];
-    signal output out[n];
-
-    for (var i = 0; i<n; i++) {
-        out[i] <== in[n - 1 - i];
-    }
-}
-
-template InverseNum2Bits(n) {
-    signal input in;
-    signal output out[n];
-
-    component numb2Bits = Num2Bits(n);
-    numb2Bits.in <== in;
-
-    component invert = Invert(n);
-    invert.in <== numb2Bits.out;
-
-    out <== invert.out;
 }
