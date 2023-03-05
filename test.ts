@@ -128,11 +128,8 @@ async function play(hand: string[], playedCardIndex: number) {
   return res;
 }
 
-async function draw(
-  deck: string[],
-  hand: string[],
-  deckDrawnCardIndex: number
-) {
+async function draw(deck: string[], hand: string[], deckDrawnCardRng: number) {
+  const deckDrawnCardIndex = deckDrawnCardRng % deck.length;
   const deckLeaves = deck.map((l) => decimalToHex(l));
   const newDeckLeaves = removeLeaf(deckLeaves, deckDrawnCardIndex);
   const handLeaves = hand.map((l) => decimalToHex(l));
@@ -165,8 +162,8 @@ async function draw(
       newDeckRoot,
       handRoot,
       newHandRoot,
+      deckDrawnCardRng,
       drawnCardLeaf,
-      deckDrawnCardIndex,
       deckDrawnCardHashPath,
       deckTailCardLeaf,
       deckTailCardIndex,
@@ -214,7 +211,7 @@ const testDeck = [
 
 async function run() {
   await play(testHand, 1);
-  await draw(testDeck, testHand, 5);
+  await draw(testDeck, testHand, 50);
 }
 
 run();

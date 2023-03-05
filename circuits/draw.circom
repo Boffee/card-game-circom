@@ -7,8 +7,8 @@ template Draw(levels) {
     signal input newDeckRoot;
     signal input handRoot;
     signal input newHandRoot;
+    signal input deckDrawnCardRng;
     signal input drawnCardLeaf;
-    signal input deckDrawnCardIndex;
     signal input deckDrawnCardHashPath[levels];
     signal input deckTailCardLeaf;
     signal input deckTailCardIndex;
@@ -22,7 +22,7 @@ template Draw(levels) {
     checkRemoveLeaf.root <== deckRoot;
     checkRemoveLeaf.newRoot <== newDeckRoot;
     checkRemoveLeaf.removeLeaf <== drawnCardLeaf;
-    checkRemoveLeaf.removeIndex <== deckDrawnCardIndex;
+    checkRemoveLeaf.removeIndex <-- deckDrawnCardRng % (deckTailCardIndex + 1);
     checkRemoveLeaf.removeHashPath <== deckDrawnCardHashPath;
     checkRemoveLeaf.tailLeaf <== deckTailCardLeaf;
     checkRemoveLeaf.tailIndex <== deckTailCardIndex;
@@ -38,4 +38,4 @@ template Draw(levels) {
     checkAppendToTail.appendHashPath <== handDrawnCardHashPath;
 }
 
-component main {public [deckRoot, newDeckRoot, handRoot, newHandRoot]} = Draw(6);
+component main {public [deckRoot, newDeckRoot, handRoot, newHandRoot, deckDrawnCardRng]} = Draw(6);
